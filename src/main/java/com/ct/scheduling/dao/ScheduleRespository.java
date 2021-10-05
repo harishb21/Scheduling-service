@@ -8,6 +8,6 @@ import com.ct.scheduling.enitity.Schedule;
 @Repository
 public interface ScheduleRespository extends JpaRepository<Schedule, Long>{
 
-	Schedule getByAppointmentId(long id);
+	
 
 }

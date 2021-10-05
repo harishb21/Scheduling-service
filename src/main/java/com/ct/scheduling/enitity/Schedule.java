@@ -1,5 +1,6 @@
 package com.ct.scheduling.enitity;
 
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,21 +13,20 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name="appointment")
-@Setter @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class Schedule {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "appointment_id")
-	private long appointmentId;
+	private long id;
 	
 	@Column(name = "meeting_title")
-	private String meetingTitle;
+	private String title;
 	
 	@Column(name = "description")
 	private String description;
@@ -37,14 +37,11 @@ public class Schedule {
 	@Column(name = "patient_id")
 	private long patientId;
 	
-	@Column(name = "appointment_date")
-	private String appointmentDate;
-	
 	@Column(name = "appointment_starttime")
-	private String aptStartTime;
+	private String startTime;
 	
 	@Column(name = "appointment_endtime")
-	private String aptEndTime;
+	private String endTime;
 	
 	@Column(name = "reason")
 	private String 	reason;

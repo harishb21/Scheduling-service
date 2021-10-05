@@ -13,18 +13,19 @@ import lombok.ToString;
 @ToString
 public class Staff {
 
-	private long staffId;
-	private int roleId;
-	private int empId;
+	private long userId;
 	private String title;
 	private String firstName;
 	private String lastName;
 	private String email;
-	private String birthDate;
-	private String username;
+	private Date birthDate;
+	private long contactNo;
 	private String password;
+	private int attempt;
 	private boolean deleted;
-	private boolean active;
-	private String createdOn;
-	private String updatedOn;
+	private String status;
+	private Date createdOn;
+	private Date updatedOn;
+	private int roleId;
+	private int empId;
 }

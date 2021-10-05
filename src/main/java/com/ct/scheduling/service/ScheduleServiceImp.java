@@ -1,5 +1,6 @@
 package com.ct.scheduling.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,8 +33,9 @@ public class ScheduleServiceImp implements ScheduleService{
 	}
 
 	@Override
-	public void saveSchedule(Schedule schedule) {
-		scheduleDao.save(schedule);
+	public Schedule saveSchedule(Schedule schedule) {
+		 scheduleDao.save(schedule);
+		 return schedule;
 	}
 
 	@Override
@@ -51,7 +53,7 @@ public class ScheduleServiceImp implements ScheduleService{
 
 	@Override
 	public void deleteSchedule(long appointmentId) {
-		System.out.println("--deleteSchedule--------service 48-----------");
+	log.info("deleteSchedule call--------------");
 		//Optional<Schedule> theschedule = scheduleDao.findById(appointmentId);
 		//System.out.println("------delete exception----present----"+theschedule.isPresent());
 		Schedule schedule = scheduleDao.getById(appointmentId);
@@ -60,32 +62,12 @@ public class ScheduleServiceImp implements ScheduleService{
 		 scheduleDao.delete(schedule);
 	}
 	
-	public ResponseTemplate getAllStaffDetails(long id) {
-		System.out.println("-----service metohd called -------------------------");
-		ResponseTemplate vo = new ResponseTemplate();
-		Schedule schedule= scheduleDao.getById(id);
-		log.info("service infoo------------------------------");
-//		List<Staff> staff = (List<Staff>) restTemplate.
-//				getForObject("http://localhost:8082/employees", Staff.class);
-//		System.out.println("---------------------------------");
-//		System.out.println("staff-list--"+staff);
-		Staff staff1 = restTemplate.
-		getForObject("http://localhost:8082/employees/"+
-		6, Staff.class);
-		System.out.println("----staff1-----77-----");
-		System.out.println(staff1);
-		log.info("staff details --------------------------------------------");
-		log.info(staff1.toString());
-		vo.setSchedule(schedule);
-		vo.setStaff(staff1);
-		
-		return vo;
-	}
+	
 
 	@Override
 	public ResponseTemplate getPatientDetails(long id) {
 		ResponseTemplate vo = new ResponseTemplate();
-		Schedule schedule= scheduleDao.getByAppointmentId(id);
+		Schedule schedule= scheduleDao.getById(id);
 		Patient patient = restTemplate.
 		getForObject("http://localhost:8082/patients/"+schedule.getPatientId(),
 				Patient.class);
@@ -95,5 +77,43 @@ public class ScheduleServiceImp implements ScheduleService{
 		return vo;
 	}
 
+	@Override
+	public List<Staff> getAllEmployess() {
+		
+		List<Staff> allEmp= restTemplate.getForObject("http://localhost:8082/employees",ArrayList.class);
+		return allEmp;
+	}
+
+	@Override
+	public List<Patient> getAllpatients() {
+	log.info("getAllpatients ---------");
+		List<Patient> allPatients= restTemplate.getForObject("http://localhost:8082/patients",ArrayList.class);
+		return allPatients;
+	}
+
+
+	
+	
+	
+	
+	
+	public ResponseTemplate getAllStaffDetails(long id) {
+		log.info("ScheduleServiceImp ResponseTemplate -------line 64-------");
+		ResponseTemplate vo = new ResponseTemplate();
+		Schedule schedule= scheduleDao.getById(id);
+		log.info("service infoo------------------------------");
+//		List<Staff> staff = (List<Staff>) restTemplate.
+//				getForObject("http://localhost:8082/employees", Staff.class);
+//		System.out.println("---------------------------------");
+//		System.out.println("staff-list--"+staff);
+		Staff staffRecord = restTemplate.getForObject("http://localhost:8082/employees/"+10, Staff.class);
+		log.info("staffRecord infoo--------"+staffRecord);
+		
+		vo.setPatient(null);
+		vo.setSchedule(schedule);
+		vo.setStaff(staffRecord);
+		
+		return vo;
+	}
 	
 }
