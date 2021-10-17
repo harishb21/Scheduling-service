@@ -1,8 +1,14 @@
 package com.ct.scheduling.service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,10 +29,10 @@ public class ScheduleServiceImp implements ScheduleService{
 
 	@Autowired
 	private ScheduleRespository scheduleDao;
-	
+
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	@Override
 	public List<Schedule> getAllAppointmets() {
 		return scheduleDao.findAll();
@@ -34,17 +40,15 @@ public class ScheduleServiceImp implements ScheduleService{
 
 	@Override
 	public Schedule saveSchedule(Schedule schedule) {
-		 scheduleDao.save(schedule);
-		 return schedule;
+		scheduleDao.save(schedule);
+		return schedule;
 	}
 
 	@Override
 	public Optional<Schedule> getSchedule(long appointmentId) {
 		
-		System.out.println("--get--service-----innn----");
 		Optional<Schedule> theschedule = scheduleDao.findById(appointmentId);
 		if(!theschedule.isPresent()) {
-			System.out.println("--get--service--37---if----");
 			throw new ScheduleNotFoundException("Appointment id Not Found "+appointmentId);
 		}
 		return theschedule;
@@ -57,7 +61,6 @@ public class ScheduleServiceImp implements ScheduleService{
 		//Optional<Schedule> theschedule = scheduleDao.findById(appointmentId);
 		//System.out.println("------delete exception----present----"+theschedule.isPresent());
 		Schedule schedule = scheduleDao.getById(appointmentId);
-		System.out.println("schedule---"+schedule);
 		
 		 scheduleDao.delete(schedule);
 	}
@@ -92,11 +95,6 @@ public class ScheduleServiceImp implements ScheduleService{
 	}
 
 
-	
-	
-	
-	
-	
 	public ResponseTemplate getAllStaffDetails(long id) {
 		log.info("ScheduleServiceImp ResponseTemplate -------line 64-------");
 		ResponseTemplate vo = new ResponseTemplate();
@@ -115,5 +113,79 @@ public class ScheduleServiceImp implements ScheduleService{
 		
 		return vo;
 	}
+
+	@Override
+	public List<Schedule> getAllAppointmentsByEmp(long roleId, long empId) {
+		List<Schedule> appointments= new ArrayList<>();
+		if (roleId == 2) {
+			appointments = scheduleDao.findByphysicianId(empId);
+		} else if (roleId == 1 || roleId == 3) {
+			appointments = scheduleDao.findAll();
+		} else if (roleId == 4) {
+			appointments = scheduleDao.findAll().stream().filter(data -> data.getPatientId() == empId)
+				.collect(Collectors.toList());
+		}
+		return appointments;
+	}
+
+	@Override
+	public boolean getAppointmentSlotByEmp(long empId) {
+		 String startDate="2021-10-23T09:00:00.000Z";
+		 String endDate="2021-10-23T04:30:00.000Z";
+		 boolean slotFlag=false;
+		List<Schedule> timeslots = scheduleDao.findByphysicianId(empId)
+				.stream()
+				.filter(data->getslotDay(data.getStartTime())==getslotDay(startDate))
+				.collect(Collectors.toList());
+		System.out.println("=================================================================");	
+		timeslots.stream().forEach(System.out::println);
+				
+		for(Schedule slot:timeslots) {
+			if(getslot(slot.getStartTime()).compareTo(getslot(startDate))==0
+				&& getslot(slot.getEndTime()).compareTo(getslot(endDate))==0) {
+				slotFlag = true;
+			}else if(((getslot(slot.getStartTime()).isBefore(getslot(startDate)) 
+					|| (getslot(slot.getStartTime()).isEqual(getslot(startDate))))
+					&& (getslot(slot.getEndTime()).isAfter(getslot(startDate))))
+				|| ((getslot(slot.getStartTime()).isBefore(getslot(endDate)) 
+						|| (getslot(slot.getStartTime()).isEqual(getslot(endDate))))
+						&& (getslot(slot.getEndTime()).isAfter(getslot(endDate))))
+					) {
+				slotFlag = true;
+			}else if((getslot(startDate).isBefore(getslot(slot.getStartTime()))
+					|| getslot(slot.getStartTime()).isEqual(getslot(slot.getStartTime())))
+					&& getslot(startDate).isAfter(getslot(slot.getEndTime()))) {
+				slotFlag = true;
+			}
+		}
 	
+		System.out.println("===========================sslot available flag======================================");	
+		System.out.println("slotFlag ===="+slotFlag);
+		
+		
+		return slotFlag;
+		
+	}
+	
+	static int getslotDay(String date){
+		//String startDate="2021-09-30T04:30:00.000Z";
+	    TemporalAccessor t1 = DateTimeFormatter.ISO_INSTANT.parse(date);
+	    Instant i11 = Instant.from(t1);
+	    return LocalDateTime.ofInstant(i11, ZoneOffset.UTC).getDayOfYear();
+	}
+	
+	static LocalDateTime getslot(String date){
+	    TemporalAccessor t1 = DateTimeFormatter.ISO_INSTANT.parse(date);
+	    Instant i11 = Instant.from(t1);
+	    return LocalDateTime.ofInstant(i11, ZoneOffset.UTC);
+	}
+//	appointments = scheduleDao.findAll().stream()
+//	.filter(data -> data.getPhysicianId() == empId)
+//	.collect(Collectors.toList());
+
+	@Override
+	public List<Schedule> getAppointmentByEmpId(long empId) {
+		// TODO Auto-generated method stub
+		return scheduleDao.findByphysicianId(empId);
+	}
 }

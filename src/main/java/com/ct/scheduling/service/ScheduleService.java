@@ -27,6 +27,13 @@ public interface ScheduleService {
 	public List<Staff> getAllEmployess();
 
 	public List<Patient> getAllpatients();
+	
+	public List<Schedule> getAllAppointmentsByEmp(long roleId,long empId);
+
+	public boolean getAppointmentSlotByEmp(long empId);
+	
+	public List<Schedule> getAppointmentByEmpId(long empId);
+	
 
 	
 }
