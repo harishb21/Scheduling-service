@@ -5,13 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter @Getter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScheduleResponseDTO {
-
-	private String responseCode;
-	private String responseMsg;
-	private String timeStamp;
-
+public class Mail {
+	private String to;
+	private String subject;
+	private String body;
 }

@@ -16,4 +16,6 @@ public class SchedulingMicroserviceApplication {
 	public RestTemplate restTemplate() {
 		return new RestTemplate();
 	}
+	
+	
 }

@@ -6,8 +6,9 @@ import java.util.Optional;
 import com.ct.scheduling.enitity.Patient;
 import com.ct.scheduling.enitity.ResponseTemplate;
 import com.ct.scheduling.enitity.Schedule;
-import com.ct.scheduling.enitity.ScheduleResponseDTO;
 import com.ct.scheduling.enitity.Staff;
+import com.ct.scheduling.enitity.TimeSlot;
+import com.ct.scheduling.enitity.TimeSlotDTO;
 
 
 public interface ScheduleService {
@@ -20,19 +21,17 @@ public interface ScheduleService {
 	
 	public void deleteSchedule(long id);
 
-	public ResponseTemplate getAllStaffDetails(long id);
-
-	public ResponseTemplate getPatientDetails(long id);
-
-	public List<Staff> getAllEmployess();
+	public List<Staff> getAllEmployees();
 
 	public List<Patient> getAllpatients();
 	
 	public List<Schedule> getAllAppointmentsByEmp(long roleId,long empId);
 
-	public boolean getAppointmentSlotByEmp(long empId);
-	
 	public List<Schedule> getAppointmentByEmpId(long empId);
+
+	public TimeSlotDTO getTimeSlotCheck(TimeSlot timeslot);
+
+	public List<Schedule> getSortedAppointments();
 	
 
 	

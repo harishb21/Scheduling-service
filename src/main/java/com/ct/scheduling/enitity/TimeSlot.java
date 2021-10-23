@@ -11,8 +11,8 @@ import lombok.Setter;
 public class TimeSlot {
 
 	private long roleId;
-	private long staffempId;
+	private long physicianEmpId;
 	private long patientId;
 	private String startDateTime;
-	private String endTDateime;
+	private String endDateTime;
 }
