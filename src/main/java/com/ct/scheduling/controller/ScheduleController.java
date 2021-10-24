@@ -162,9 +162,10 @@ public class ScheduleController {
 							@ApiResponse(code = 403, message = "Forbidden!"),
 							@ApiResponse(code = 404, message = "Not Found!") })
 	@GetMapping("/appointments/sorted/{roleId}/{employeeId}")
-	public ResponseEntity<List<Schedule>> getSortedAppointments() {
+	public ResponseEntity<List<Schedule>> getSortedAppointments(@PathVariable long roleId,
+			@PathVariable long employeeId) {
 		log.info("ScheduleController getSortedAppointments()");
-		return new ResponseEntity<>(scheduleService.getSortedAppointments(), HttpStatus.OK);
+		return new ResponseEntity<>(scheduleService.getSortedAppointments(roleId,employeeId), HttpStatus.OK);
 	}
 
 	

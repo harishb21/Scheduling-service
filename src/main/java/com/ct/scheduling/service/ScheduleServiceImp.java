@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 
 import com.ct.scheduling.dao.ScheduleRespository;
@@ -212,8 +213,11 @@ public class ScheduleServiceImp implements ScheduleService {
 	}
 
 	@Override
-	public List<Schedule> getSortedAppointments() {
+	public List<Schedule> getSortedAppointments(long roleId,
+			long empId) {
 		List<Schedule> sortedlist = new ArrayList<>();
+		List<Schedule> appointments = new ArrayList<>();
+
 		Comparator<Schedule> customComparator = new Comparator<Schedule>() {
 		    @Override
 		    public int compare(Schedule o1, Schedule o2) {
@@ -225,8 +229,16 @@ public class ScheduleServiceImp implements ScheduleService {
 
 		    }
 		};
-		if(!scheduleDao.findAll().isEmpty()) {
-		sortedlist = scheduleDao.findAll()
+		
+		if (roleId == 2) {
+			appointments = scheduleDao.findByphysicianId(empId);
+		} else if (roleId == 1 || roleId == 3) {
+			appointments = scheduleDao.findAll();
+		} else if (roleId == 4) {
+			appointments = scheduleDao.findBypatientId(empId);
+		}
+		if(!appointments.isEmpty()) {
+		sortedlist = appointments
 				.stream()
 				.filter(data->geFilterValue(data.getStartTime()))
 				.sorted(customComparator)

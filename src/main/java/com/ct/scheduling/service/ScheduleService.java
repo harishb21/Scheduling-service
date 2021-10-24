@@ -3,6 +3,8 @@ package com.ct.scheduling.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.web.bind.annotation.PathVariable;
+
 import com.ct.scheduling.enitity.Patient;
 import com.ct.scheduling.enitity.ResponseTemplate;
 import com.ct.scheduling.enitity.Schedule;
@@ -31,7 +33,7 @@ public interface ScheduleService {
 
 	public TimeSlotDTO getTimeSlotCheck(TimeSlot timeslot);
 
-	public List<Schedule> getSortedAppointments();
+	public List<Schedule> getSortedAppointments(long roleId,long employeeId);
 	
 
 	
