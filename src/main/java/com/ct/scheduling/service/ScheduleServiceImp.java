@@ -47,18 +47,29 @@ public class ScheduleServiceImp implements ScheduleService {
 
 	@Override
 	public Schedule saveSchedule(Schedule schedule) {
-		scheduleDao.save(schedule);
+	scheduleDao.save(schedule);
+		Patient patient = restTemplate.getForObject("http://localhost:8082/users/patients/"
+		+ schedule.getPatientId(), Patient.class);
+
+		Staff staff =
+		restTemplate.getForObject("http://localhost:8082/employees/employeeId/" +
+		schedule.getPhysicianId(), Staff.class);
 		
-	/*Patient patient = restTemplate.getForObject("http://localhost:8082/patients/" + schedule.getPatientId(),
-				Patient.class);
-	
-	Staff staff = restTemplate.getForObject("http://localhost:8082/employees/employeeId/" + schedule.getPhysicianId(),
-			Staff.class);*/
-	
-	//Mail mail = new Mail("harish.bandhamravuri@gmail.com","spring subject","hello");
-	
-	// mail1 = restTemplate.postForObject("http://localhost:8082/mail/send/" , mail,Mail.class);
-		return schedule;
+		String subject = "Welcome to CT General Hospital!";
+		String body = String.format(
+				"Hi %s,\r\n"
+				+ "\r\nThanks for choosing CT General hospital. You’ve just taken an exciting step in your wellness journey, and we’re so glad to be a part of it.\r\n"
+				+ "\r\nYour appointment is booked for  %s on  %s\r\n"
+				+ "\r\nAll the information you need for your appointment is available here.\r\n"
+				+ "\r\nTo Sign in to your account, please visit https://localhost:8080/ or Click here. \r\n\r\n"
+				+ "Best Regards,\r\n"
+				+ "CT General Hospital", 
+				patient.getFirstName(), getFormateTime(schedule.getStartTime(),schedule.getEndTime()), getFormateDate(schedule.getStartTime()));
+		
+		 Mail mail = new Mail(patient.getEmail(),subject,body);
+		 boolean falg= restTemplate.postForObject("http://localhost:8082/mail/send/" ,mail,Boolean.class);
+		 schedule.setId(4);
+				return schedule;
 	}
 
 	@Override
@@ -83,7 +94,6 @@ public class ScheduleServiceImp implements ScheduleService {
 		scheduleDao.delete(schedule);
 	}
 
-	
 	@Override
 	public List<Staff> getAllEmployees() {
 		log.info("ScheduleServiceImp  getAllEmployess()");
@@ -143,9 +153,19 @@ public class ScheduleServiceImp implements ScheduleService {
 			throw new ScheduleNotFoundException("Given PhysicianId is not found. please provide valid PhysicianId");
 		}
 		TimeSlotDTO timeslotdto = new TimeSlotDTO();
-		List<Schedule> timeslots = scheduleDao.findByphysicianId(timeslot.getPhysicianEmpId()).stream()
-				.filter(data -> getslotDay(data.getStartTime()) == getslotDay(uiStartTime))
-				.collect(Collectors.toList());
+		List<Schedule> timeslots = new ArrayList<>();
+		
+		if(timeslot.getRoleId() == 2) {
+			timeslots = scheduleDao.findByphysicianId(timeslot.getPhysicianEmpId()).stream()
+						.filter(data -> getslotDay(data.getStartTime()) == getslotDay(uiStartTime))
+						.collect(Collectors.toList());
+			timeslotdto.setMessage("Physician");
+		}else if(timeslot.getRoleId() == 4) {
+			timeslots = scheduleDao.findBypatientId(timeslot.getPatientId()).stream()
+					.filter(data -> getslotDay(data.getStartTime()) == getslotDay(uiStartTime))
+					.collect(Collectors.toList());
+			timeslotdto.setMessage("Patient");
+		}
 		for (Schedule slot : timeslots) {
 
 			slotFlag = slotValidation(uiStartTime, uiEndTime, slot);
@@ -154,13 +174,13 @@ public class ScheduleServiceImp implements ScheduleService {
 			}
 		}
 		timeslotdto.setTimeSlotFlag(slotFlag);
-		timeslotdto.setMessage("");
+		//timeslotdto.setMessage("");
 		return timeslotdto;
 	}
 
 	private boolean slotValidation(String uiStartTime, String uiEndTime, Schedule slot) {
 		boolean slotFlag = false;
-	
+
 		if (getslotDate(slot.getStartTime()).compareTo(getslotDate(uiStartTime)) == 0
 				&& getslotDate(slot.getEndTime()).compareTo(getslotDate(uiEndTime)) == 0) {
 			slotFlag = true;
@@ -192,72 +212,72 @@ public class ScheduleServiceImp implements ScheduleService {
 		Instant i11 = Instant.from(t1);
 		return LocalDateTime.ofInstant(i11, ZoneOffset.UTC).getDayOfYear();
 	}
-	
-	public static String  getDate(String date) {
-		TemporalAccessor t1 = DateTimeFormatter.ISO_INSTANT.parse(date);
-		Instant i11 = Instant.from(t1);
-		String formatted = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDateTime.ofInstant(i11, ZoneOffset.UTC));
-		return formatted;
+
+	public String getFormateDate(String sdate) {
+		 TemporalAccessor t1 = DateTimeFormatter.ISO_INSTANT.parse(sdate);
+		    Instant i11 = Instant.from(t1);
+		    LocalDateTime lt1 = LocalDateTime.ofInstant(i11, ZoneOffset.UTC);
+		    DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		    return lt1.format(format);
+		
+		
 	}
 
-	public static String  getTime(String sDate,String eDate) {
+	public static String getFormateTime(String sDate ,String eDate ) {
 		TemporalAccessor t1 = DateTimeFormatter.ISO_INSTANT.parse(sDate);
 		TemporalAccessor t2 = DateTimeFormatter.ISO_INSTANT.parse(eDate);
 		Instant i1 = Instant.from(t1);
 		Instant i2 = Instant.from(t2);
 		LocalDateTime ldt1 = LocalDateTime.ofInstant(i1, ZoneOffset.UTC);
 		LocalDateTime ldt2 = LocalDateTime.ofInstant(i2, ZoneOffset.UTC);
-		String time1  = ldt1.format(DateTimeFormatter.ofPattern("HH:mm"));
-		String time2  = ldt2.format(DateTimeFormatter.ofPattern("HH:mm"));
-		return (time1 +"-"+time2);
+		String time1 = ldt1.format(DateTimeFormatter.ofPattern("hh:mm a"));
+		String time2 = ldt2.format(DateTimeFormatter.ofPattern("hh:mm a"));
+		return (time1 + "-" + time2);
 	}
 
 	@Override
-	public List<Schedule> getSortedAppointments(long roleId,
-			long empId) {
+	public List<Schedule> getSortedAppointments(long roleId, long empId) {
 		List<Schedule> sortedlist = new ArrayList<>();
 		List<Schedule> appointments = new ArrayList<>();
 
 		Comparator<Schedule> customComparator = new Comparator<Schedule>() {
-		    @Override
-		    public int compare(Schedule o1, Schedule o2) {
-		    if(getslotDate(o1.getStartTime())== (getslotDate(o2.getStartTime())))
-	            return 0;
-	        else if(getslotDate(o1.getStartTime()).isAfter(getslotDate(o2.getStartTime())))
-	            return 1;
-	        else return -1;
+			@Override
+			public int compare(Schedule o1, Schedule o2) {
+				if (getslotDate(o1.getStartTime()) == (getslotDate(o2.getStartTime())))
+					return 0;
+				else if (getslotDate(o1.getStartTime()).isAfter(getslotDate(o2.getStartTime())))
+					return 1;
+				else
+					return -1;
 
-		    }
+			}
 		};
-		
+
 		if (roleId == 2) {
 			appointments = scheduleDao.findByphysicianId(empId);
 		} else if (roleId == 1 || roleId == 3) {
+			System.out.println("ScheduleServiceImp.getSortedAppointments()---"+roleId);
 			appointments = scheduleDao.findAll();
 		} else if (roleId == 4) {
 			appointments = scheduleDao.findBypatientId(empId);
 		}
-		if(!appointments.isEmpty()) {
-		sortedlist = appointments
-				.stream()
-				.filter(data->geFilterValue(data.getStartTime()))
-				.sorted(customComparator)
-				.collect(Collectors.toList());
+		if (!appointments.isEmpty()) {
+			sortedlist = appointments.stream().filter(data -> geFilterValue(data.getStartTime()))
+					.sorted(customComparator).collect(Collectors.toList());
 		}
 		return sortedlist;
 	}
-	
+
 	boolean geFilterValue(String startTime) {
-		
+
 		boolean sortflag = false;
-		LocalDate localDate =LocalDate.now();
-		if(getslotDate(startTime).toLocalDate().isEqual(localDate) ||
-		getslotDate(startTime).toLocalDate().isAfter(localDate)	
-		) {
+		LocalDate localDate = LocalDate.now();
+		if (getslotDate(startTime).toLocalDate().isEqual(localDate)
+				|| getslotDate(startTime).toLocalDate().isAfter(localDate)) {
 			sortflag = true;
 		}
-		
+
 		return sortflag;
 	}
-	
+
 }
