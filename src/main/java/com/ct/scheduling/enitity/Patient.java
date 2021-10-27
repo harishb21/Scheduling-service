@@ -28,8 +28,6 @@ public class Patient {
 	private String status;
 	private Date createdOn;
 	private Date updatedOn;
-	private Integer roleId;
-	private Integer empId;
 	private String race;
 	private String ethnicity;
 	private String languages;
