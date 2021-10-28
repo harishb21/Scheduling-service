@@ -1,12 +1,18 @@
 package com.ct.scheduling.enitity;
 
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -49,5 +55,10 @@ public class Schedule {
 	@ApiModelProperty(notes = "Appointment reason",name="reason",required=true,value="reason for to update Appointment")
 	@Column(name = "reason")
 	private String 	reason;
+	
+	@Column(name = "appointment_date")
+	@CreationTimestamp
+	@Temporal(TemporalType.DATE)
+	private Date appointmentDate;
 	
 }

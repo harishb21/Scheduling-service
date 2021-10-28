@@ -1,5 +1,6 @@
 package com.ct.scheduling.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +33,11 @@ public interface ScheduleService {
 	public TimeSlotDTO getTimeSlotCheck(TimeSlot timeslot);
 
 	public List<Schedule> getSortedAppointments(long roleId,long employeeId);
+	public List<String> getAppointments(Long patientId);
+
+
+
+	public Long getAppointmentIdByAppointmentDate(Date appointmentDate);
 	
 
 	

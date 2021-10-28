@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -335,6 +336,31 @@ public class ScheduleServiceImp implements ScheduleService {
 		}
 
 		return sortflag;
+	}
+	@Override
+	public List<String> getAppointments(Long patientId) {
+
+
+
+	List<Schedule> schList = scheduleDao.findAllAppointmentIds(patientId);
+	List<String> list = new ArrayList<>();
+	for (Schedule s : schList) {
+	list.add(s.getAppointmentDate().toString());
+	}
+
+
+
+	return list;
+	}
+
+
+
+	@Override
+	public Long getAppointmentIdByAppointmentDate(Date appointmentDate) {
+
+
+
+	return scheduleDao.findIdByAppointmentDate(appointmentDate);
 	}
 
 }

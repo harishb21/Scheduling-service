@@ -1,10 +1,12 @@
 package com.ct.scheduling.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -15,10 +17,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ct.scheduling.enitity.Patient;
-import com.ct.scheduling.enitity.ResponseTemplate;
 import com.ct.scheduling.enitity.Schedule;
 import com.ct.scheduling.enitity.Staff;
 import com.ct.scheduling.enitity.TimeSlot;
@@ -27,8 +29,8 @@ import com.ct.scheduling.service.ScheduleService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -168,6 +170,17 @@ public class ScheduleController {
 		return new ResponseEntity<>(scheduleService.getSortedAppointments(roleId,employeeId), HttpStatus.OK);
 	}
 
-	
+	@GetMapping("/appointments/dates/{patientId}")
+	public ResponseEntity<List<String>> getAppointments(@PathVariable Long patientId) {
+	return new ResponseEntity<>(scheduleService.getAppointments(patientId), HttpStatus.OK);
+	}
+
+
+
+	@GetMapping("/appointment/id")
+	public ResponseEntity<?> getAppointments(@RequestParam("visitedDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date visitedDate) {
+	System.out.println(visitedDate);
+	return new ResponseEntity<>(scheduleService.getAppointmentIdByAppointmentDate(visitedDate), HttpStatus.OK);
+	}
 	
 }
