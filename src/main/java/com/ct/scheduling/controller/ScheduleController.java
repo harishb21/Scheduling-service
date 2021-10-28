@@ -175,11 +175,8 @@ public class ScheduleController {
 	return new ResponseEntity<>(scheduleService.getAppointments(patientId), HttpStatus.OK);
 	}
 
-
-
 	@GetMapping("/appointment/id")
 	public ResponseEntity<?> getAppointments(@RequestParam("visitedDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date visitedDate) {
-	System.out.println(visitedDate);
 	return new ResponseEntity<>(scheduleService.getAppointmentIdByAppointmentDate(visitedDate), HttpStatus.OK);
 	}
 	

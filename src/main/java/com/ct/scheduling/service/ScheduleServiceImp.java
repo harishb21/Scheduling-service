@@ -56,7 +56,7 @@ public class ScheduleServiceImp implements ScheduleService {
 		if (null == staff) {
 			throw new ScheduleNotFoundException(SchedulerCommonConstant.PHYSICIANERROR);
 		}
-		if (null == patient ) {
+		if (null == patient) {
 			throw new ScheduleNotFoundException(SchedulerCommonConstant.PATIENTERROR);
 		}
 		String patientsubject = "Welcome to CT General Hospital!";
@@ -100,16 +100,18 @@ public class ScheduleServiceImp implements ScheduleService {
 	@Override
 	public void deleteSchedule(long appointmentId) {
 		log.info("ScheduleServiceImp  deleteSchedule()");
+		
 		Optional<Schedule> theschedule = scheduleDao.findById(appointmentId);
 		if (!theschedule.isPresent()) {
 			throw new ScheduleNotFoundException("Given appointmentId is not found. please provide valid AppointmentId");
+		}else {
+			scheduleDao.deleteById(appointmentId);
 		}
-		Schedule schedule = scheduleDao.getById(appointmentId);
-		scheduleDao.delete(schedule);
-		Patient patient = restTemplate.getForObject(SchedulerCommonConstant.PATIENTSERVICE + +schedule.getPatientId(),
+		
+		Patient patient = restTemplate.getForObject(SchedulerCommonConstant.PATIENTSERVICE + +theschedule.get().getPatientId(),
 				Patient.class);
 
-		Staff staff = restTemplate.getForObject(SchedulerCommonConstant.EMPLOYEEBYID + schedule.getPhysicianId(),
+		Staff staff = restTemplate.getForObject(SchedulerCommonConstant.EMPLOYEEBYID + theschedule.get().getPhysicianId(),
 				Staff.class);
 		if (null == staff) {
 			throw new ScheduleNotFoundException(SchedulerCommonConstant.PHYSICIANERROR);
@@ -124,8 +126,8 @@ public class ScheduleServiceImp implements ScheduleService {
 						+ "\r\nAll the information you need for your appointment is available here.\r\n"
 						+ "\r\nplease visit https://localhost:8080/ or Click here. \r\n\r\n" + "Best Regards,\r\n"
 						+ "CT General Hospital",
-				patient.getFirstName(), getFormateDate(schedule.getStartTime()),
-				getFormateTime(schedule.getStartTime(), schedule.getEndTime()));
+				patient.getFirstName(), getFormateDate(theschedule.get().getStartTime()),
+				getFormateTime(theschedule.get().getStartTime(), theschedule.get().getEndTime()));
 		String physicianSubject = "CT General Hospital Appointment Details";
 		String physicianBody = String.format(
 				"Hi %s,\r\n" + "\r\nI apologize for the short notice and any inconvenience this may cause.\r\n"
@@ -133,8 +135,8 @@ public class ScheduleServiceImp implements ScheduleService {
 						+ "\r\nAll the information you need for your appointment is available here.\r\n"
 						+ "\r\nplease visit https://localhost:8080/ or Click here. \r\n\r\n" + "Best Regards,\r\n"
 						+ "CT General Hospital",
-				staff.getFirstName(), getFormateTime(schedule.getStartTime(), schedule.getEndTime()),
-				getFormateDate(schedule.getStartTime()));
+				staff.getFirstName(), getFormateTime(theschedule.get().getStartTime(), theschedule.get().getEndTime()),
+				getFormateDate(theschedule.get().getStartTime()));
 
 		Mail patientMail = new Mail(patient.getEmail(), patientsubject, patientBody);
 		restTemplate.postForObject(SchedulerCommonConstant.MAILSERVICEURL, patientMail, Boolean.class);
@@ -200,33 +202,33 @@ public class ScheduleServiceImp implements ScheduleService {
 			throw new ScheduleNotFoundException("please provide valid Start date Or end date time range");
 		}
 		Role role = restTemplate.getForObject(SchedulerCommonConstant.ROLESERVICE + timeslot.getRoleId(), Role.class);
-		if (null  == role) {
+		if (null == role) {
 			throw new ScheduleNotFoundException(SchedulerCommonConstant.ROLEERROR);
 		}
-		
+
 		TimeSlotDTO timeslotdto = new TimeSlotDTO();
 		List<Schedule> timeslots = new ArrayList<>();
 
 		if (timeslot.getRoleId() == 2) {
 			staff = restTemplate.getForObject(SchedulerCommonConstant.EMPLOYEEBYID + timeslot.getPhysicianEmpId(),
 					Staff.class);
-			if(null != staff) {
-			timeslots = scheduleDao.findByphysicianId(staff.getEmpId()).stream()
-					.filter(data -> getslotDay(data.getStartTime()) == getslotDay(uiStartTime))
-					.collect(Collectors.toList());
-			timeslotdto.setMessage("Physician");
-			}else {
+			if (null != staff) {
+				timeslots = scheduleDao.findByphysicianId(staff.getEmpId()).stream()
+						.filter(data -> getslotDay(data.getStartTime()) == getslotDay(uiStartTime))
+						.collect(Collectors.toList());
+				timeslotdto.setMessage("Physician");
+			} else {
 				throw new ScheduleNotFoundException(SchedulerCommonConstant.PHYSICIANERROR);
 			}
 		} else if (timeslot.getRoleId() == 4) {
 			patient = restTemplate.getForObject(SchedulerCommonConstant.PATIENTSERVICE + timeslot.getPatientId(),
 					Patient.class);
-			if(null != patient) {
-			timeslots = scheduleDao.findBypatientId(patient.getUserId()).stream()
-					.filter(data -> getslotDay(data.getStartTime()) == getslotDay(uiStartTime))
-					.collect(Collectors.toList());
-			timeslotdto.setMessage("Patient");
-			}else {
+			if (null != patient) {
+				timeslots = scheduleDao.findBypatientId(patient.getUserId()).stream()
+						.filter(data -> getslotDay(data.getStartTime()) == getslotDay(uiStartTime))
+						.collect(Collectors.toList());
+				timeslotdto.setMessage("Patient");
+			} else {
 				throw new ScheduleNotFoundException(SchedulerCommonConstant.PATIENTERROR);
 			}
 		}
@@ -337,30 +339,23 @@ public class ScheduleServiceImp implements ScheduleService {
 
 		return sortflag;
 	}
+
 	@Override
 	public List<String> getAppointments(Long patientId) {
 
+		List<Schedule> schList = scheduleDao.findAllAppointmentIds(patientId);
+		List<String> list = new ArrayList<>();
+		for (Schedule s : schList) {
+			list.add(s.getAppointmentDate().toString());
+		}
 
-
-	List<Schedule> schList = scheduleDao.findAllAppointmentIds(patientId);
-	List<String> list = new ArrayList<>();
-	for (Schedule s : schList) {
-	list.add(s.getAppointmentDate().toString());
+		return list;
 	}
-
-
-
-	return list;
-	}
-
-
 
 	@Override
 	public Long getAppointmentIdByAppointmentDate(Date appointmentDate) {
 
-
-
-	return scheduleDao.findIdByAppointmentDate(appointmentDate);
+		return scheduleDao.findIdByAppointmentDate(appointmentDate);
 	}
 
 }
