@@ -11,7 +11,6 @@ import com.ct.scheduling.enitity.Staff;
 import com.ct.scheduling.enitity.TimeSlot;
 import com.ct.scheduling.enitity.TimeSlotDTO;
 
-
 public interface ScheduleService {
 
 	public List<Schedule> getAllAppointmets();
@@ -33,9 +32,8 @@ public interface ScheduleService {
 	public TimeSlotDTO getTimeSlotCheck(TimeSlot timeslot);
 
 	public List<Schedule> getSortedAppointments(long roleId,long employeeId);
+	
 	public List<String> getAppointments(Long patientId);
-
-
 
 	public Long getAppointmentIdByAppointmentDate(Date appointmentDate);
 	

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.ct.scheduling.constant.ScheduleConstant;
 import com.ct.scheduling.constant.SchedulerCommonConstant;
 import com.ct.scheduling.dao.ScheduleRespository;
 import com.ct.scheduling.enitity.Patient;
@@ -47,7 +48,7 @@ public class ScheduleServiceImp implements ScheduleService {
 
 	@Override
 	public Schedule saveSchedule(Schedule schedule) {
-		scheduleDao.save(schedule);
+		try {
 		Patient patient = restTemplate.getForObject(SchedulerCommonConstant.PATIENTSERVICE + schedule.getPatientId(),
 				Patient.class);
 
@@ -65,24 +66,29 @@ public class ScheduleServiceImp implements ScheduleService {
 				+ "\r\nYour appointment has booked for  %s on  %s\r\n"
 				+ "All the information you need for your appointment is available here.\r\n"
 				+ "\r\nTo Sign in to your account, please visit https://localhost:8080/ or Click here.\r\n"
-				+ "Best Regards,\r\n" + "CT General Hospital", patient.getFirstName(),
+				+ ScheduleConstant.MAIL, patient.getFirstName(),
 				getFormateTime(schedule.getStartTime(), schedule.getEndTime()),
 				getFormateDate(schedule.getStartTime()));
 
 		String physicianSubject = "CT General Hospital Appointment Details";
 		String physicianBody = String.format(
 				"Hi %s," + "\r\nAppointment has booked with %s at  %s on  %s\r\n"
-						+ "\r\nplease visit https://localhost:8080/ or Click here. \r\n" + "Best Regards,\r\n"
-						+ "CT General Hospital",
+						+ "\r\nplease visit https://localhost:8080/ or Click here. \r\n" 
+						+ ScheduleConstant.MAIL,
 				staff.getFirstName(), patient.getFirstName(),
 				getFormateTime(schedule.getStartTime(), schedule.getEndTime()),
 				getFormateDate(schedule.getStartTime()));
-
+		scheduleDao.save(schedule);
 		Mail patientMail = new Mail(patient.getEmail(), patientsubject, patientBody);
 		restTemplate.postForObject(SchedulerCommonConstant.MAILSERVICEURL, patientMail, Boolean.class);
 
 		Mail physicianMail = new Mail(patient.getEmail(), physicianSubject, physicianBody);
 		restTemplate.postForObject(SchedulerCommonConstant.MAILSERVICEURL, physicianMail, Boolean.class);
+		
+		}catch(Exception e) {
+			throw new ScheduleNotFoundException(e.getMessage());
+		}
+		
 		return schedule;
 	}
 
@@ -100,7 +106,7 @@ public class ScheduleServiceImp implements ScheduleService {
 	@Override
 	public void deleteSchedule(long appointmentId) {
 		log.info("ScheduleServiceImp  deleteSchedule()");
-		
+		try {
 		Optional<Schedule> theschedule = scheduleDao.findById(appointmentId);
 		if (!theschedule.isPresent()) {
 			throw new ScheduleNotFoundException("Given appointmentId is not found. please provide valid AppointmentId");
@@ -121,20 +127,22 @@ public class ScheduleServiceImp implements ScheduleService {
 		}
 		String patientsubject = "Welcome to CT General Hospital!";
 		String patientBody = String.format(
-				"Hi %s,\r\n" + "\r\nI apologize for the short notice and any inconvenience this may cause.\r\n"
+						"Hi %s,\r\n" 
+						+ "\r\nI apologize for the short notice and any inconvenience this may cause.\r\n"
 						+ "\r\nI'm forced to cancel our appointment which was scheduled on %s at %s\r\n"
 						+ "\r\nAll the information you need for your appointment is available here.\r\n"
-						+ "\r\nplease visit https://localhost:8080/ or Click here. \r\n\r\n" + "Best Regards,\r\n"
-						+ "CT General Hospital",
+						+ "\r\nplease visit https://localhost:8080/ or Click here. \r\n\r\n" 
+						+ScheduleConstant.MAIL,
 				patient.getFirstName(), getFormateDate(theschedule.get().getStartTime()),
 				getFormateTime(theschedule.get().getStartTime(), theschedule.get().getEndTime()));
 		String physicianSubject = "CT General Hospital Appointment Details";
 		String physicianBody = String.format(
-				"Hi %s,\r\n" + "\r\nI apologize for the short notice and any inconvenience this may cause.\r\n"
+						"Hi %s,\r\n" 
+						+ "\r\nI apologize for the short notice and any inconvenience this may cause.\r\n"
 						+ "\r\nI'm forced to cancel our appointment which was scheduled on %s at %s\r\n"
 						+ "\r\nAll the information you need for your appointment is available here.\r\n"
-						+ "\r\nplease visit https://localhost:8080/ or Click here. \r\n\r\n" + "Best Regards,\r\n"
-						+ "CT General Hospital",
+						+ "\r\nplease visit https://localhost:8080/ or Click here. \r\n\r\n" 
+						+ ScheduleConstant.MAIL,
 				staff.getFirstName(), getFormateTime(theschedule.get().getStartTime(), theschedule.get().getEndTime()),
 				getFormateDate(theschedule.get().getStartTime()));
 
@@ -143,7 +151,9 @@ public class ScheduleServiceImp implements ScheduleService {
 
 		Mail physicianMail = new Mail(patient.getEmail(), physicianSubject, physicianBody);
 		restTemplate.postForObject(SchedulerCommonConstant.MAILSERVICEURL, physicianMail, Boolean.class);
-
+		}catch(Exception e) {
+			throw new ScheduleNotFoundException(e.getMessage());
+		}
 	}
 
 	@Override
@@ -250,15 +260,18 @@ public class ScheduleServiceImp implements ScheduleService {
 				&& getslotDate(slot.getEndTime()).compareTo(getslotDate(uiEndTime)) == 0) {
 			slotFlag = true;
 
-		} else if ((getslotDate(slot.getStartTime()).isBefore(getslotDate(uiStartTime))
+		}  
+		if ((getslotDate(slot.getStartTime()).isBefore(getslotDate(uiStartTime))
 				|| getslotDate(slot.getStartTime()).compareTo(getslotDate(uiStartTime)) == 0)
 				&& getslotDate(slot.getEndTime()).isAfter(getslotDate(uiStartTime))) {
 			slotFlag = true;
-		} else if (getslotDate(slot.getStartTime()).isBefore(getslotDate(uiEndTime))
+		} 
+		if (getslotDate(slot.getStartTime()).isBefore(getslotDate(uiEndTime))
 				&& (getslotDate(slot.getEndTime()).isAfter(getslotDate(uiEndTime)))
 				|| getslotDate(slot.getEndTime()).compareTo(getslotDate(uiEndTime)) == 0) {
 			slotFlag = true;
-		} else if ((getslotDate(uiStartTime).isBefore(getslotDate(slot.getStartTime()))
+		} 
+		if ((getslotDate(uiStartTime).isBefore(getslotDate(slot.getStartTime()))
 				|| getslotDate(uiStartTime).compareTo(getslotDate(slot.getStartTime())) == 0)
 				&& getslotDate(uiEndTime).isAfter(getslotDate(slot.getEndTime()))) {
 			slotFlag = true;
