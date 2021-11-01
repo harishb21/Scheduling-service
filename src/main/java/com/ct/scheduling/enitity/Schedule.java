@@ -60,12 +60,5 @@ public class Schedule {
 	@Column(name = "reason")
 	private String 	reason;
 	
-	@ApiModelProperty(notes = "Appointment appointmentDate",name="appointmentDate",required=true,value="2021-10-28T18:40:19.292+00:00")
-	@Column(name = "appointment_date")
-	@CreationTimestamp
-	@Temporal(TemporalType.DATE)
-	private Date appointmentDate;
-	
-	
 	
 }

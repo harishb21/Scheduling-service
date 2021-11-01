@@ -359,14 +359,15 @@ public class ScheduleServiceImp implements ScheduleService {
 		List<Schedule> schList = scheduleDao.findAllAppointmentIds(patientId);
 		List<String> list = new ArrayList<>();
 		for (Schedule s : schList) {
-			list.add(s.getAppointmentDate().toString());
+			System.out.println(s.getStartTime().toString());
+			list.add(s.getStartTime().toString());
 		}
 
 		return list;
 	}
 
 	@Override
-	public Long getAppointmentIdByAppointmentDate(Date appointmentDate) {
+	public Long getAppointmentIdByAppointmentDate(String appointmentDate) {
 
 		return scheduleDao.findIdByAppointmentDate(appointmentDate);
 	}

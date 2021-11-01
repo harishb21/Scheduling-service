@@ -184,7 +184,8 @@ public class ScheduleController {
 	}
 
 	@GetMapping("/appointment/id")
-	public ResponseEntity<Long> getAppointments(@RequestParam("visitedDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date visitedDate) {
+	public ResponseEntity<Long> getAppointments(@RequestParam("visitedDate") String visitedDate) {
+		
 	return new ResponseEntity<>(scheduleService.getAppointmentIdByAppointmentDate(visitedDate), HttpStatus.OK);
 	}
 	

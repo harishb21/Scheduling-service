@@ -35,7 +35,7 @@ public interface ScheduleService {
 	
 	public List<String> getAppointments(Long patientId);
 
-	public Long getAppointmentIdByAppointmentDate(Date appointmentDate);
+	public Long getAppointmentIdByAppointmentDate(String appointmentDate);
 	
 
 	
