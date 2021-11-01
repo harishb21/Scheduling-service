@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Date;
 
-import org.joda.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,8 +48,7 @@ class SchedulingMicroserviceApplicationTests {
  				2,
  				"2021-09-30T04:30:00.000Z",
  				"2021-09-30T05:00:00.000Z",
- 				"no reason",
- 				new Date("12-10-2021"));
+ 				"no reason");
 				
 
 		 ScheduleDTO dto = modelMapper.map(entity, ScheduleDTO.class);
