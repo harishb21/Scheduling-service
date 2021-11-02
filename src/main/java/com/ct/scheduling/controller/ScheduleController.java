@@ -36,7 +36,7 @@ import io.swagger.annotations.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@CrossOrigin("*")
+//@CrossOrigin("*")
 @RequestMapping("/api")
 @Slf4j
 @Api(value = "ScheduleController", tags = { "Schedule Controller" })
