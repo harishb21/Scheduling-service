@@ -1,6 +1,5 @@
 package com.ct.scheduling.dao;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,11 +15,11 @@ public interface ScheduleRespository extends JpaRepository<Schedule, Long>{
 	
 	List<Schedule> findBypatientId(long patientId);
 
-	@Query("FROM Schedule WHERE patientId=:patientId")
+	@Query("FROM Schedule WHERE patientId=:patientId order by startTime desc ")
 	List<Schedule> findAllAppointmentIds(Long patientId);
 	
-	@Query("select id FROM Schedule WHERE appointmentDate=:appointmentDate")
-	Long findIdByAppointmentDate(Date appointmentDate);
+	@Query("select id FROM Schedule WHERE startTime=:startTime")
+	Long findIdByAppointmentDate(String startTime);
 
 	
 

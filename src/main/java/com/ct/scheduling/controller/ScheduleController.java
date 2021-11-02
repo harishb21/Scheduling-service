@@ -25,6 +25,8 @@ import com.ct.scheduling.enitity.Schedule;
 import com.ct.scheduling.enitity.Staff;
 import com.ct.scheduling.enitity.TimeSlot;
 import com.ct.scheduling.enitity.TimeSlotDTO;
+import com.ct.scheduling.facade.ScheduleDTO;
+import com.ct.scheduling.facade.ScheduleDTOService;
 import com.ct.scheduling.service.ScheduleService;
 
 import io.swagger.annotations.Api;
@@ -45,6 +47,9 @@ public class ScheduleController {
 
 	@Autowired
 	private ScheduleService scheduleService;
+	
+	@Autowired
+	private ScheduleDTOService scheduleDTOService;
 
 	@ApiOperation(value = "Get all appointments", response = ArrayList.class, tags = "getAllAppointments")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success|OK"),
@@ -119,10 +124,11 @@ public class ScheduleController {
 							@ApiResponse(code = 403, message = "Forbidden!"),
 							@ApiResponse(code = 404, message = "Not Found!") })
 	@PostMapping("/appointments")
-	public ResponseEntity<Schedule> newAppointment(@RequestBody Schedule newAppointment) {
+	public ResponseEntity<ScheduleDTO> newAppointment(@RequestBody ScheduleDTO scheduleDTO) {
 		log.info("ScheduleController newAppointment()");
-
-		return new ResponseEntity<>(scheduleService.saveSchedule(newAppointment), HttpStatus.OK);
+		Schedule newAppointment = scheduleDTOService.convertToEntity(scheduleDTO);
+		Schedule addedAppointment = scheduleService.saveSchedule(newAppointment);
+		return new ResponseEntity<>(scheduleDTOService.convertToDTO(addedAppointment), HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "update Appointment", response = Schedule.class, tags = "updateAppointment")
@@ -131,9 +137,11 @@ public class ScheduleController {
 							@ApiResponse(code = 403, message = "Forbidden!"),
 							@ApiResponse(code = 404, message = "Not Found!") })
 	@PutMapping("/appointments")
-	public ResponseEntity<Schedule> updateAppointment(@RequestBody Schedule updateAppointment) {
+	public ResponseEntity<ScheduleDTO> updateAppointment(@RequestBody ScheduleDTO scheduleDTO) {
 		log.info("ScheduleController updateAppointment()");
-		return new ResponseEntity<>(scheduleService.saveSchedule(updateAppointment), HttpStatus.OK);
+		Schedule updateAppointment = scheduleDTOService.convertToEntity(scheduleDTO);
+		Schedule appointment = scheduleService.saveSchedule(updateAppointment);
+		return new ResponseEntity<>(scheduleDTOService.convertToDTO(appointment), HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "Delete Appointment", response = String.class, tags = "deleteAppointment")
@@ -175,11 +183,9 @@ public class ScheduleController {
 	return new ResponseEntity<>(scheduleService.getAppointments(patientId), HttpStatus.OK);
 	}
 
-
-
 	@GetMapping("/appointment/id")
-	public ResponseEntity<?> getAppointments(@RequestParam("visitedDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date visitedDate) {
-	System.out.println(visitedDate);
+	public ResponseEntity<Long> getAppointments(@RequestParam("visitedDate") String visitedDate) {
+		
 	return new ResponseEntity<>(scheduleService.getAppointmentIdByAppointmentDate(visitedDate), HttpStatus.OK);
 	}
 	
